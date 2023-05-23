@@ -5,6 +5,7 @@
 <div class="container py-5">
 
     <h1>{{$project->title}}</h1>
+    <h4 class="text-secondary fst-italic">{{$project->type->name ?? ''}}</h4>
     <hr>
 
     <div id="info" class="d-flex flex-column gap-3">

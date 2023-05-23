@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Project;
+use App\Models\Type;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
@@ -29,7 +30,10 @@ class ProjectController extends Controller
      */
     public function create()
     {
-        return view('admin/projects/create');
+
+        $types = Type::all();
+
+        return view('admin/projects/create', compact('types'));
         
     }
 
@@ -44,6 +48,13 @@ class ProjectController extends Controller
         $this->validation($request);
 
         $formData = $request->all();
+
+        $existingProject = Project::where('title', $formData['title'])->first();
+
+        if ($existingProject) {
+            return redirect()->back()->withErrors(['title' => 'A project with the same title already exists.'])->withInput();
+        }
+
 
         $formData['slug'] = Str::slug($formData['title'], '-');
 
@@ -76,7 +87,10 @@ class ProjectController extends Controller
      */
     public function edit(Project $project)
     {
-        return view('admin/projects/edit', compact('project'));
+
+        $types = Type::all();
+
+        return view('admin/projects/edit', compact('project', 'types'));
     }
 
     /**
@@ -88,7 +102,7 @@ class ProjectController extends Controller
      */
     public function update(Request $request, Project $project)
     {
-        $this->validation($request);
+        $this->validation($request, $project->id);
 
         $formData = $request->all();
 
@@ -112,34 +126,31 @@ class ProjectController extends Controller
         return redirect()->route('admin.projects.index');
     }
 
-    private function validation($request){
-
+    private function validation($request, $projectId = null){
         $formData = $request->all();
-
-        $validator = Validator::make($formData,[
-
-            'title' => 'required|unique:projects',
+    
+        $validator = Validator::make($formData, [
+            
+            'title' => 'required|unique:projects,title,'. $projectId,
             'description' => 'required',
             'link' => 'required',
             'language' => 'required|max:50',
             'framework' => 'required|max:50',
             'execution_date' => 'required',
-            
-        ],
-        [
-            'title.required'=>'Insert a title',
-            'title.unique'=>'Title already taken, please insert an alternative value',
+            'type_id' => 'nullable|exists:types,id'
+        ], [
+            'title.required' => 'Insert a title',
+            'title.unique' => 'Title already taken, please insert an alternative value',
             'description.required' => 'Insert a description',
             'language.required' => 'Insert a language',
             'language.required' => 'The language field can have a maximum of 50 characters',
             'framework.required' => 'Insert a framework',
             'framework.max' => 'The framework field can have a maximum of 50 characters',
             'execution_date.required' => 'Insert an execution date',
-
-
-
+            'type_id.exists' => 'Insert an existing category value',
+            
         ])->validate();
-
+    
         return $validator;
     }
 }
