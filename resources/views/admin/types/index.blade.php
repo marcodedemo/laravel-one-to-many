@@ -9,9 +9,9 @@
     <table class="table text-center">
         <thead>
           <tr>
-            <th scope="col">ID</th>
             <th scope="col">Name</th>
             <th scope="col">Description</th>
+            <th scope="col">Slug</th>
             <th scope="col">Detail</th>
           </tr>
         </thead>
@@ -20,15 +20,12 @@
 
           <tr>
 
-            <th scope="row">{{$type->id}}</th>
-            <td>{{$type->name}}</td>
+            <td scope="row">{{$type->name}}</td>
             <td>{{$type->description}}</td>
+            <td>{{$type->slug}}</td>
 
             <td>
-
-                <a href="{{route('admin.types.show', $type->slug)}}" class="text-danger"><i class="fa-solid fa-magnifying-glass"></i>
-                </a>
-
+              <a href="{{route('admin.types.show', $type->slug)}}" class="text-danger"><i class="fa-solid fa-magnifying-glass"></i></a>
             </td>
 
           </tr>
