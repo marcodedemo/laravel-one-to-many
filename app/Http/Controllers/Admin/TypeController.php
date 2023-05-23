@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Type;
 use Illuminate\Http\Request;
-
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 
 
@@ -41,7 +41,15 @@ class TypeController extends Controller
      */
     public function store(Request $request)
     {
+        $this->validation($request);
+
         $formData = $request->all();
+
+        $existingType = Type::where('name', $formData['name'])->first();
+
+        if ($existingType) {
+            return redirect()->back()->withErrors(['name' => 'A type with the same name already exists.'])->withInput();
+        }
 
         $formData['slug'] = Str::slug($formData['name'], '-');
 
@@ -86,6 +94,8 @@ class TypeController extends Controller
      */
     public function update(Request $request, Type $type)
     {
+        $this->validation($request, $type->id);
+
         $formData = $request->all();
 
         $type->update($formData);
@@ -106,5 +116,23 @@ class TypeController extends Controller
         $type->delete();
 
         return redirect()->route('admin.types.index');
+    }
+
+    private function validation($request, $typeId = null){
+        
+        $formData = $request->all();
+    
+        $validator = Validator::make($formData, [
+            
+            'name' => 'required|unique:types,name,' . $typeId,
+            'description' => 'required',
+        ], [
+            'name.required' => 'Insert a name',
+            'name.unique' => 'Name already taken, please insert an alternative value',
+            'description.required' => 'Insert a description',
+
+        ])->validate();
+    
+        return $validator;
     }
 }

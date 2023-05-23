@@ -55,7 +55,6 @@ class ProjectController extends Controller
             return redirect()->back()->withErrors(['title' => 'A project with the same title already exists.'])->withInput();
         }
 
-
         $formData['slug'] = Str::slug($formData['title'], '-');
 
         $newProject = new Project();
@@ -127,6 +126,7 @@ class ProjectController extends Controller
     }
 
     private function validation($request, $projectId = null){
+        
         $formData = $request->all();
     
         $validator = Validator::make($formData, [
@@ -148,7 +148,7 @@ class ProjectController extends Controller
             'framework.max' => 'The framework field can have a maximum of 50 characters',
             'execution_date.required' => 'Insert an execution date',
             'type_id.exists' => 'Insert an existing category value',
-            
+
         ])->validate();
     
         return $validator;
